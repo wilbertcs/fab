@@ -1,0 +1,85 @@
+[scheduling]
+    [[dependencies]]
+        graph = """
+            grab_gcom => build_gcom_ar
+            grab_gcom => build_gcom_so
+            build_jules
+            build_gcom_ar => build_um
+            grab_lfric => build_atm
+            grab_lfric => build_gungho
+            grab_lfric => build_mesh_tools
+        """
+
+[runtime]
+
+    [[root]]
+        env-script = """
+            module use /data/users/lfric/modules/modulefiles.rhel7
+            module load environment/lfric/gnu
+            conda init bash
+            conda activate sci-fab
+        """
+
+    [[common]]
+        [[[job]]]
+            batch system = slurm
+            execution time limit = PT10M
+        [[[directives]]]
+            --mem=500
+#           --ntasks=4
+            --cpus-per-task=4
+            --export=NONE
+        [[[environment]]]
+            FAB_WORKSPACE=$SCRATCH/fab_workspace
+            OMPI_FC=gfortran
+
+    [[gcom]]
+        [[[environment]]]
+            GCOM_REVISION={{ GCOM_REVISION }}
+
+    [[jules]]
+        [[[environment]]]
+            JULES_REVISION={{ JULES_REVISION }}
+
+    [[um]]
+        [[[environment]]]
+            UM_REVISION={{ UM_REVISION }}
+
+    [[lfric]]
+
+    [[grab_gcom]]
+        inherit = gcom, common
+        script = grab_gcom.py
+
+    [[build_gcom_ar]]
+        inherit = gcom, common
+        script = build_gcom_ar.py
+
+    [[build_gcom_so]]
+        inherit = gcom, common
+        script = build_gcom_so.py
+
+    [[build_jules]]
+        inherit = jules, common
+        script = build_jules.py
+
+    [[build_um]]
+        inherit = um, common
+
+        script = build_um.py
+
+    [[grab_lfric]]
+        inherit = lfric, common
+        script = grab_lfric.py
+
+    [[build_atm]]
+        inherit = lfric, common
+        script = atm.py
+
+    [[build_gungho]]
+        inherit = lfric, common
+        script = gungho.py
+
+    [[build_mesh_tools]]
+        inherit = lfric, common
+        script = mesh_tools.py
